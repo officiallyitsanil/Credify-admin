@@ -1,0 +1,86 @@
+.loans-page {
+    flex: 1;
+}
+
+.loans-content {
+    padding: var(--spacing-xl);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.loans-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.loans-filters {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.loans-table {
+    overflow-x: auto;
+}
+
+.loans-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.loans-table th {
+    text-align: left;
+    padding: var(--spacing-md);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.loans-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.loans-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.loans-table tbody tr:hover {
+    background: var(--background);
+}
+
+.loan-user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.loan-user-email {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.loan-amount {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.loan-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.rejection-reason {
+    color: var(--error);
+    font-size: 0.8125rem;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .loans-content {
+        padding: var(--spacing-lg);
+    }
+}

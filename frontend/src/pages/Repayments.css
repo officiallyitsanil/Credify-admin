@@ -1,0 +1,79 @@
+.repayments-page {
+    flex: 1;
+}
+
+.repayments-content {
+    padding: var(--spacing-xl);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.repayments-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.repayments-filters {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.repayments-table {
+    overflow-x: auto;
+}
+
+.repayments-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.repayments-table th {
+    text-align: left;
+    padding: var(--spacing-md);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.repayments-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.repayments-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.repayments-table tbody tr:hover {
+    background: var(--background);
+}
+
+.overdue-row {
+    background: rgba(238, 93, 80, 0.05) !important;
+}
+
+.repayment-user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.repayment-user-email {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.repayment-amount,
+.repayment-emi {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .repayments-content {
+        padding: var(--spacing-lg);
+    }
+}

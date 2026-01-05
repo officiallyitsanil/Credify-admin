@@ -1,0 +1,132 @@
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+    padding: var(--spacing-lg);
+}
+
+.login-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 450px;
+    overflow: hidden;
+}
+
+.login-header {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+    color: white;
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    text-align: center;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.login-logo-img {
+    height: 150px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    background: white;
+    color: var(--primary-purple);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.login-logo h1 {
+    color: white;
+    margin: 0;
+    font-size: 2rem;
+}
+
+.login-header h2 {
+    color: white;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.login-form {
+    padding: var(--spacing-xl);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.form-group input {
+    width: 100%;
+}
+
+.error-message {
+    background: rgba(238, 93, 80, 0.1);
+    color: var(--error);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.875rem;
+    border-left: 3px solid var(--error);
+}
+
+.login-demo-info {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.login-demo-info p {
+    margin: 0.25rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.login-demo-info p:first-child {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        max-width: 100%;
+    }
+
+    .login-header {
+        padding: var(--spacing-xl) var(--spacing-lg);
+    }
+
+    .login-form {
+        padding: var(--spacing-lg);
+    }
+}
