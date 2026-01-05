@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api';
+// Use Render URL in production, localhost in development
+const API_URL = import.meta.env.MODE === 'production'
+    ? 'https://credifyapp-admin.onrender.com/api'
+    : 'http://localhost:5003/api';
 
 // Create axios instance
 const api = axios.create({
