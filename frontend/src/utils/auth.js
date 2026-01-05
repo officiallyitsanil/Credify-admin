@@ -1,4 +1,7 @@
-// Store token and admin data
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
+
+// Store Firebase token and admin data
 export const setAuth = (token, admin) => {
     localStorage.setItem('token', token);
     localStorage.setItem('admin', JSON.stringify(admin));
@@ -21,7 +24,15 @@ export const isAuthenticated = () => {
 };
 
 // Logout
-export const logout = () => {
+export const logout = async () => {
+    try {
+        // Sign out from Firebase
+        await signOut(auth);
+    } catch (error) {
+        console.error('Error signing out:', error);
+    }
+
+    // Clear local storage
     localStorage.removeItem('token');
     localStorage.removeItem('admin');
     window.location.href = '/login';

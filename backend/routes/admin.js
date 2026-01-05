@@ -1,53 +1,56 @@
 const express = require('express');
 const router = express.Router();
+const admin = require('../utils/firebase');
 const Admin = require('../models/Admin');
 
-// @route   POST /api/admin/login
-// @desc    Admin login
+// @route   POST /api/admin/verify
+// @desc    Verify Firebase token and get/create admin
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/verify', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { idToken } = req.body;
 
         // Validate input
-        if (!email || !password) {
+        if (!idToken) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide email and password'
+                message: 'Please provide Firebase ID token'
             });
         }
 
-        // Check for admin (include password field)
-        const admin = await Admin.findOne({ email }).select('+password');
+        // Verify Firebase token
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { uid, phone_number } = decodedToken;
 
-        if (!admin) {
-            return res.status(401).json({
+        // Only allow specific phone number
+        const allowedPhoneNumber = '+918500216667';
+        if (phone_number !== allowedPhoneNumber) {
+            return res.status(403).json({
                 success: false,
-                message: 'Invalid credentials'
+                message: 'Access denied. This phone number is not authorized.'
             });
         }
 
-        // Check if password matches
-        const isMatch = await admin.comparePassword(password);
+        // Check if admin exists
+        let adminUser = await Admin.findOne({ firebaseUid: uid });
 
-        if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid credentials'
+        // If admin doesn't exist, create one (auto-registration)
+        if (!adminUser) {
+            adminUser = await Admin.create({
+                firebaseUid: uid,
+                phoneNumber: phone_number,
+                name: 'Admin', // Default name, can be updated later
+                role: 'admin'
             });
         }
-
-        // Create token
-        const token = admin.getSignedJwtToken();
 
         res.status(200).json({
             success: true,
-            token,
             admin: {
-                id: admin._id,
-                name: admin.name,
-                email: admin.email,
-                role: admin.role
+                id: adminUser._id,
+                name: adminUser.name,
+                phoneNumber: adminUser.phoneNumber,
+                role: adminUser.role
             }
         });
     } catch (err) {
@@ -70,7 +73,7 @@ router.get('/me', require('../middleware/auth').protect, async (req, res) => {
             admin: {
                 id: req.admin._id,
                 name: req.admin.name,
-                email: req.admin.email,
+                phoneNumber: req.admin.phoneNumber,
                 role: req.admin.role
             }
         });

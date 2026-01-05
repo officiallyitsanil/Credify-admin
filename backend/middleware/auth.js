@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
+const admin = require('../utils/firebase');
 const Admin = require('../models/Admin');
 
-// Protect routes - verify JWT token
+// Protect routes - verify Firebase token
 exports.protect = async (req, res, next) => {
     let token;
 
@@ -19,11 +19,20 @@ exports.protect = async (req, res, next) => {
     }
 
     try {
-        // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Verify Firebase token
+        const decodedToken = await admin.auth().verifyIdToken(token);
 
-        // Get admin from token
-        req.admin = await Admin.findById(decoded.id);
+        // Only allow specific phone number
+        const allowedPhoneNumber = '+918500216667';
+        if (decodedToken.phone_number !== allowedPhoneNumber) {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. This phone number is not authorized.'
+            });
+        }
+
+        // Get admin from database using Firebase UID
+        req.admin = await Admin.findOne({ firebaseUid: decodedToken.uid });
 
         if (!req.admin) {
             return res.status(401).json({

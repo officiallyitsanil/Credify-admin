@@ -6,10 +6,14 @@ const User = require('./models/User');
 const Loan = require('./models/Loan');
 
 // Sample data
+// Note: For Firebase authentication, admins are auto-created on first login
+// This seed data is kept for reference but won't create admin users
+// Admins will be created when they first log in with their phone number
+
 const adminData = {
     name: 'Admin User',
-    email: 'admin@credify.com',
-    password: 'admin123',
+    phoneNumber: '+911234567890',  // Example phone number
+    firebaseUid: 'dummy-firebase-uid',  // Will be replaced on actual login
     role: 'super_admin'
 };
 
