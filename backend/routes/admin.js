@@ -31,17 +31,28 @@ router.post('/verify', async (req, res) => {
             });
         }
 
-        // Check if admin exists
+        // Check if admin exists by Firebase UID
         let adminUser = await Admin.findOne({ firebaseUid: uid });
 
-        // If admin doesn't exist, create one (auto-registration)
+        // If not found by UID, check by phone number (for first-time Firebase login)
         if (!adminUser) {
-            adminUser = await Admin.create({
-                firebaseUid: uid,
-                phoneNumber: phone_number,
-                name: 'Admin', // Default name, can be updated later
-                role: 'admin'
-            });
+            adminUser = await Admin.findOne({ phoneNumber: phone_number });
+
+            // If found by phone, update the firebaseUid
+            if (adminUser) {
+                adminUser.firebaseUid = uid;
+                await adminUser.save();
+                console.log('Updated existing admin with Firebase UID:', uid);
+            } else {
+                // Create new admin (auto-registration)
+                adminUser = await Admin.create({
+                    firebaseUid: uid,
+                    phoneNumber: phone_number,
+                    name: 'Admin', // Default name, can be updated later
+                    role: 'admin'
+                });
+                console.log('Created new admin:', adminUser._id);
+            }
         }
 
         res.status(200).json({

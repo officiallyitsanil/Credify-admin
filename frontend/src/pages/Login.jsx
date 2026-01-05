@@ -81,15 +81,19 @@ const Login = () => {
 
             // Verify with backend and check phone number authorization
             try {
+                console.log('Verifying with backend, idToken:', idToken);
                 const response = await adminAPI.verify({ idToken });
+                console.log('Backend verification response:', response.data);
                 const { admin } = response.data;
 
                 // Store auth info with Firebase token
                 setAuth(idToken, admin);
+                console.log('Auth stored, navigating to dashboard');
 
                 navigate('/');
             } catch (backendErr) {
                 console.error('Backend verification failed:', backendErr);
+                console.error('Error response:', backendErr.response?.data);
                 // Sign out from Firebase if backend rejects
                 await auth.signOut();
                 setError(backendErr.response?.data?.message || 'Access denied. Please contact administrator.');

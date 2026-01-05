@@ -11,7 +11,9 @@ import './App.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+  const authenticated = isAuthenticated();
+  console.log('ProtectedRoute check - authenticated:', authenticated);
+  return authenticated ? children : <Navigate to="/login" replace />;
 };
 
 // Layout Component
