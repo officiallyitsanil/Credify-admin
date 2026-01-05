@@ -48,6 +48,7 @@ export default api;
 
 // API endpoints
 export const adminAPI = {
+    checkPhone: (data) => api.post('/admin/check-phone', data),
     verify: (data) => api.post('/admin/verify', data),
     getProfile: () => api.get('/admin/me')
 };

@@ -3,6 +3,54 @@ const router = express.Router();
 const admin = require('../utils/firebase');
 const Admin = require('../models/Admin');
 
+// @route   POST /api/admin/check-phone
+// @desc    Check if phone number is authorized before sending OTP
+// @access  Public
+router.post('/check-phone', async (req, res) => {
+    try {
+        const { phoneNumber } = req.body;
+
+        // Validate input
+        if (!phoneNumber) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide phone number'
+            });
+        }
+
+        // Only allow specific phone number
+        const allowedPhoneNumber = '+918500216667';
+        if (phoneNumber !== allowedPhoneNumber) {
+            return res.status(403).json({
+                success: false,
+                message: 'This phone number is not authorized. Please contact administrator.'
+            });
+        }
+
+        // Check if admin exists in database
+        const adminUser = await Admin.findOne({ phoneNumber });
+
+        if (!adminUser) {
+            return res.status(403).json({
+                success: false,
+                message: 'Phone number not found. Please contact administrator.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Phone number authorized. You can proceed with OTP verification.'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: err.message
+        });
+    }
+});
+
 // @route   POST /api/admin/verify
 // @desc    Verify Firebase token and get/create admin
 // @access  Public

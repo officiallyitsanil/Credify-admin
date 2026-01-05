@@ -42,6 +42,19 @@ const Login = () => {
                 return;
             }
 
+            // First, check if phone number is authorized in database
+            try {
+                console.log('Checking phone number authorization:', phoneNumber);
+                await adminAPI.checkPhone({ phoneNumber });
+                console.log('Phone number authorized');
+            } catch (checkErr) {
+                console.error('Phone check failed:', checkErr);
+                setError(checkErr.response?.data?.message || 'This phone number is not authorized.');
+                setLoading(false);
+                return;
+            }
+
+            // If authorized, proceed with Firebase OTP
             setupRecaptcha();
             const appVerifier = window.recaptchaVerifier;
             const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
