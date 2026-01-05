@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../utils/firebase';
+import { adminAPI } from '../utils/api';
 import { setAuth } from '../utils/auth';
 import Button from '../components/Button';
 import logo from '../assets/logo.jpeg';
@@ -78,13 +79,23 @@ const Login = () => {
             // Get Firebase ID token
             const idToken = await user.getIdToken();
 
-            // Store auth info with Firebase token
-            setAuth(idToken, {
-                phoneNumber: user.phoneNumber,
-                uid: user.uid
-            });
+            // Verify with backend and check phone number authorization
+            try {
+                const response = await adminAPI.verify({ idToken });
+                const { admin } = response.data;
 
-            navigate('/');
+                // Store auth info with Firebase token
+                setAuth(idToken, admin);
+
+                navigate('/');
+            } catch (backendErr) {
+                console.error('Backend verification failed:', backendErr);
+                // Sign out from Firebase if backend rejects
+                await auth.signOut();
+                setError(backendErr.response?.data?.message || 'Access denied. Please contact administrator.');
+                setLoading(false);
+                return;
+            }
         } catch (err) {
             console.error('Error verifying OTP:', err);
             setError('Invalid OTP. Please try again.');
