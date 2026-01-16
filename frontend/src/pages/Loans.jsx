@@ -70,20 +70,20 @@ const Loans = () => {
                                 All Loans
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-                                onClick={() => setFilter('pending')}
+                                className={`filter-btn ${filter === 'REQUESTED' ? 'active' : ''}`}
+                                onClick={() => setFilter('REQUESTED')}
                             >
                                 Pending
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'approved' ? 'active' : ''}`}
-                                onClick={() => setFilter('approved')}
+                                className={`filter-btn ${filter === 'APPROVED' ? 'active' : ''}`}
+                                onClick={() => setFilter('APPROVED')}
                             >
                                 Approved
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-                                onClick={() => setFilter('rejected')}
+                                className={`filter-btn ${filter === 'REJECTED' ? 'active' : ''}`}
+                                onClick={() => setFilter('REJECTED')}
                             >
                                 Rejected
                             </button>
@@ -94,12 +94,12 @@ const Loans = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>User</th>
+                                    <th>Phone Number</th>
                                     <th>Amount</th>
-                                    <th>Purpose</th>
+                                    <th>Loan Reference</th>
                                     <th>Interest Rate</th>
-                                    <th>Tenure</th>
-                                    <th>EMI</th>
+                                    <th>Tenure (Days)</th>
+                                    <th>Total Repayable</th>
                                     <th>Status</th>
                                     <th>Date</th>
                                     <th>Actions</th>
@@ -108,21 +108,16 @@ const Loans = () => {
                             <tbody>
                                 {loans.map((loan) => (
                                     <tr key={loan._id}>
-                                        <td>
-                                            <div className="loan-user">
-                                                <div className="loan-user-name">{loan.user?.name || 'Unknown'}</div>
-                                                <div className="loan-user-email">{loan.user?.email || ''}</div>
-                                            </div>
-                                        </td>
+                                        <td>{loan.phoneNumber}</td>
                                         <td className="loan-amount">{formatCurrency(loan.amount)}</td>
-                                        <td>{loan.purpose}</td>
+                                        <td>{loan.loanReferenceNumber || 'N/A'}</td>
                                         <td>{loan.interestRate}%</td>
-                                        <td>{loan.tenure} months</td>
-                                        <td>{formatCurrency(loan.emiAmount)}</td>
+                                        <td>{loan.tenureDays} days</td>
+                                        <td>{formatCurrency(loan.totalRepayable)}</td>
                                         <td>
                                             <Badge variant={
-                                                loan.status === 'approved' ? 'success' :
-                                                    loan.status === 'rejected' ? 'error' :
+                                                loan.status === 'APPROVED' || loan.status === 'DISBURSED' || loan.status === 'REPAID' ? 'success' :
+                                                    loan.status === 'REJECTED' ? 'error' :
                                                         'warning'
                                             }>
                                                 {loan.status}
@@ -130,7 +125,7 @@ const Loans = () => {
                                         </td>
                                         <td>{formatDate(loan.createdAt)}</td>
                                         <td>
-                                            {loan.status === 'pending' && (
+                                            {loan.status === 'REQUESTED' && (
                                                 <div className="loan-actions">
                                                     <Button
                                                         size="sm"

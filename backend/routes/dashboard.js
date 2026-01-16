@@ -15,26 +15,26 @@ router.get('/stats', async (req, res) => {
     try {
         // User statistics
         const totalUsers = await User.countDocuments();
-        const verifiedUsers = await User.countDocuments({ kycStatus: 'verified' });
-        const pendingKyc = await User.countDocuments({ kycStatus: 'pending' });
-        const blockedUsers = await User.countDocuments({ accountStatus: 'blocked' });
+        const verifiedUsers = await User.countDocuments({ kycStatus: 'VERIFIED' });
+        const pendingKyc = await User.countDocuments({ kycStatus: 'PENDING' });
+        const blockedUsers = await User.countDocuments({ isBlocked: true });
 
         // Loan statistics
         const totalLoans = await Loan.countDocuments();
-        const pendingLoans = await Loan.countDocuments({ status: 'pending' });
-        const approvedLoans = await Loan.countDocuments({ status: 'approved' });
-        const activeLoans = await Loan.countDocuments({ status: { $in: ['approved', 'active'] } });
-        const completedLoans = await Loan.countDocuments({ status: 'completed' });
-        const rejectedLoans = await Loan.countDocuments({ status: 'rejected' });
+        const pendingLoans = await Loan.countDocuments({ status: 'REQUESTED' });
+        const approvedLoans = await Loan.countDocuments({ status: 'APPROVED' });
+        const activeLoans = await Loan.countDocuments({ status: 'DISBURSED' });
+        const completedLoans = await Loan.countDocuments({ status: 'REPAID' });
+        const rejectedLoans = await Loan.countDocuments({ status: 'REJECTED' });
 
         // Calculate total loan amounts
         const totalLoanAmount = await Loan.aggregate([
-            { $match: { status: { $in: ['approved', 'active', 'completed'] } } },
+            { $match: { status: { $in: ['APPROVED', 'DISBURSED', 'REPAID'] } } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
 
         const activeLoanAmount = await Loan.aggregate([
-            { $match: { status: { $in: ['approved', 'active'] } } },
+            { $match: { status: 'DISBURSED' } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]);
 
@@ -53,18 +53,45 @@ router.get('/stats', async (req, res) => {
             dueDate: { $gte: new Date() }
         });
 
-        // Revenue calculation (total interest earned)
+        // Revenue calculation (total interest earned from totalRepayable - amount)
         const revenue = await Loan.aggregate([
-            { $match: { status: { $in: ['approved', 'active', 'completed'] } } },
-            { $group: { _id: null, total: { $sum: { $subtract: ['$totalAmount', '$amount'] } } } }
+            { $match: { status: { $in: ['DISBURSED', 'REPAID'] } } },
+            { $group: { _id: null, total: { $sum: { $subtract: ['$totalRepayable', '$amount'] } } } }
         ]);
 
-        // Recent activities (last 10 loans)
-        const recentLoans = await Loan.find()
-            .populate('user', 'name email')
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .select('amount status createdAt user');
+        // Recent activities (last 10 loans) with user data lookup
+        const recentLoans = await Loan.aggregate([
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'phoneNumber',
+                    foreignField: 'phoneNumber',
+                    as: 'userInfo'
+                }
+            },
+            {
+                $project: {
+                    amount: 1,
+                    status: 1,
+                    createdAt: 1,
+                    phoneNumber: 1,
+                    loanReferenceNumber: 1,
+                    user: {
+                        $cond: {
+                            if: { $gt: [{ $size: '$userInfo' }, 0] },
+                            then: {
+                                name: { $arrayElemAt: ['$userInfo.fullName', 0] },
+                                email: { $arrayElemAt: ['$userInfo.email', 0] },
+                                phoneNumber: { $arrayElemAt: ['$userInfo.phoneNumber', 0] }
+                            },
+                            else: null
+                        }
+                    }
+                }
+            }
+        ]);
 
         // Monthly loan trend (last 6 months)
         const sixMonthsAgo = new Date();
@@ -146,8 +173,8 @@ router.get('/repayments', async (req, res) => {
         );
 
         const repayments = await Repayment.find(query)
-            .populate('user', 'name email phone')
-            .populate('loan', 'amount tenure')
+            .populate('user', 'fullName email phoneNumber')
+            .populate('loan', 'amount tenureDays')
             .sort({ dueDate: 1 })
             .limit(limit * 1)
             .skip((page - 1) * limit)

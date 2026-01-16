@@ -11,16 +11,16 @@ router.use(protect);
 // @access  Private
 router.get('/', async (req, res) => {
     try {
-        const { page = 1, limit = 10, search = '', kycStatus, accountStatus } = req.query;
+        const { page = 1, limit = 10, search = '', kycStatus, isBlocked } = req.query;
 
         // Build query
         const query = {};
 
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } },
+                { fullName: { $regex: search, $options: 'i' } },
                 { email: { $regex: search, $options: 'i' } },
-                { phone: { $regex: search, $options: 'i' } }
+                { phoneNumber: { $regex: search, $options: 'i' } }
             ];
         }
 
@@ -28,8 +28,8 @@ router.get('/', async (req, res) => {
             query.kycStatus = kycStatus;
         }
 
-        if (accountStatus) {
-            query.accountStatus = accountStatus;
+        if (isBlocked !== undefined) {
+            query.isBlocked = isBlocked === 'true';
         }
 
         const users = await User.find(query)
@@ -90,7 +90,7 @@ router.put('/:id/kyc', async (req, res) => {
     try {
         const { kycStatus, rejectionReason } = req.body;
 
-        if (!['verified', 'rejected'].includes(kycStatus)) {
+        if (!['VERIFIED', 'REJECTED'].includes(kycStatus)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid KYC status'
@@ -99,7 +99,7 @@ router.put('/:id/kyc', async (req, res) => {
 
         const updateData = { kycStatus };
 
-        if (kycStatus === 'rejected' && rejectionReason) {
+        if (kycStatus === 'REJECTED' && rejectionReason) {
             updateData.kycRejectionReason = rejectionReason;
         }
 
@@ -176,20 +176,13 @@ router.put('/:id/credit-limit', async (req, res) => {
 // @access  Private
 router.put('/:id/status', async (req, res) => {
     try {
-        const { accountStatus, blockReason } = req.body;
+        const { isBlocked, blockReason } = req.body;
 
-        if (!['active', 'blocked'].includes(accountStatus)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid account status'
-            });
-        }
+        const updateData = { isBlocked };
 
-        const updateData = { accountStatus };
-
-        if (accountStatus === 'blocked' && blockReason) {
+        if (isBlocked && blockReason) {
             updateData.blockReason = blockReason;
-        } else if (accountStatus === 'active') {
+        } else if (!isBlocked) {
             updateData.blockReason = '';
         }
 
@@ -209,7 +202,7 @@ router.put('/:id/status', async (req, res) => {
         res.status(200).json({
             success: true,
             data: user,
-            message: `User ${accountStatus === 'blocked' ? 'blocked' : 'unblocked'} successfully`
+            message: `User ${isBlocked ? 'blocked' : 'unblocked'} successfully`
         });
     } catch (err) {
         res.status(500).json({

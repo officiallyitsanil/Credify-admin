@@ -12,7 +12,7 @@ router.use(protect);
 // @access  Private
 router.get('/', async (req, res) => {
     try {
-        const { page = 1, limit = 10, status, userId } = req.query;
+        const { page = 1, limit = 10, status, phoneNumber } = req.query;
 
         const query = {};
 
@@ -20,14 +20,11 @@ router.get('/', async (req, res) => {
             query.status = status;
         }
 
-        if (userId) {
-            query.user = userId;
+        if (phoneNumber) {
+            query.phoneNumber = phoneNumber;
         }
 
         const loans = await Loan.find(query)
-            .populate('user', 'name email phone')
-            .populate('approvedBy', 'name email')
-            .populate('rejectedBy', 'name email')
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit)
@@ -56,10 +53,7 @@ router.get('/', async (req, res) => {
 // @access  Private
 router.get('/:id', async (req, res) => {
     try {
-        const loan = await Loan.findById(req.params.id)
-            .populate('user', 'name email phone address creditLimit')
-            .populate('approvedBy', 'name email')
-            .populate('rejectedBy', 'name email');
+        const loan = await Loan.findById(req.params.id);
 
         if (!loan) {
             return res.status(404).json({
@@ -86,7 +80,7 @@ router.get('/:id', async (req, res) => {
 // @access  Private
 router.put('/:id/approve', async (req, res) => {
     try {
-        const loan = await Loan.findById(req.params.id).populate('user');
+        const loan = await Loan.findById(req.params.id);
 
         if (!loan) {
             return res.status(404).json({
@@ -95,45 +89,51 @@ router.put('/:id/approve', async (req, res) => {
             });
         }
 
-        if (loan.status !== 'pending') {
+        if (loan.status !== 'REQUESTED') {
             return res.status(400).json({
                 success: false,
                 message: 'Only pending loans can be approved'
             });
         }
 
+        // Get user to check credit limit
+        const User = require('../models/User');
+        const user = await User.findOne({ phoneNumber: loan.phoneNumber });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
         // Check if user has sufficient credit limit
-        if (loan.amount > loan.user.creditLimit) {
+        if (loan.amount > user.creditLimit) {
             return res.status(400).json({
                 success: false,
                 message: 'Loan amount exceeds user credit limit'
             });
         }
 
-        loan.status = 'approved';
-        loan.approvedBy = req.admin._id;
+        loan.status = 'APPROVED';
         loan.approvedAt = Date.now();
-        loan.disbursedAt = Date.now();
 
         await loan.save();
 
         // Create repayment schedule
         const repayments = [];
-        const startDate = new Date();
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + loan.tenureDays);
 
-        for (let i = 1; i <= loan.tenure; i++) {
-            const dueDate = new Date(startDate);
-            dueDate.setMonth(dueDate.getMonth() + i);
-
-            repayments.push({
-                loan: loan._id,
-                user: loan.user._id,
-                emiNumber: i,
-                emiAmount: loan.emiAmount,
-                dueDate: dueDate,
-                status: 'pending'
-            });
-        }
+        // For simplicity, creating single repayment for full amount
+        repayments.push({
+            loan: loan._id,
+            user: user._id,
+            emiNumber: 1,
+            emiAmount: loan.totalRepayable,
+            dueDate: dueDate,
+            status: 'pending'
+        });
 
         await Repayment.insertMany(repayments);
 
@@ -174,15 +174,14 @@ router.put('/:id/reject', async (req, res) => {
             });
         }
 
-        if (loan.status !== 'pending') {
+        if (loan.status !== 'REQUESTED') {
             return res.status(400).json({
                 success: false,
                 message: 'Only pending loans can be rejected'
             });
         }
 
-        loan.status = 'rejected';
-        loan.rejectedBy = req.admin._id;
+        loan.status = 'REJECTED';
         loan.rejectedAt = Date.now();
         loan.rejectionReason = rejectionReason;
 

@@ -60,7 +60,7 @@ const Users = () => {
 
         try {
             await usersAPI.updateStatus(userId, {
-                accountStatus: block ? 'blocked' : 'active',
+                isBlocked: block,
                 blockReason: reason
             });
             fetchUsers();
@@ -85,20 +85,20 @@ const Users = () => {
                                 All Users
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
-                                onClick={() => setFilter('pending')}
+                                className={`filter-btn ${filter === 'PENDING' ? 'active' : ''}`}
+                                onClick={() => setFilter('PENDING')}
                             >
                                 Pending KYC
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'verified' ? 'active' : ''}`}
-                                onClick={() => setFilter('verified')}
+                                className={`filter-btn ${filter === 'VERIFIED' ? 'active' : ''}`}
+                                onClick={() => setFilter('VERIFIED')}
                             >
                                 Verified
                             </button>
                             <button
-                                className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-                                onClick={() => setFilter('rejected')}
+                                className={`filter-btn ${filter === 'REJECTED' ? 'active' : ''}`}
+                                onClick={() => setFilter('REJECTED')}
                             >
                                 Rejected
                             </button>
@@ -123,18 +123,18 @@ const Users = () => {
                                     <tr key={user._id}>
                                         <td>
                                             <div className="user-cell">
-                                                <div className="user-avatar">{user.name.charAt(0)}</div>
+                                                <div className="user-avatar">{user.fullName?.charAt(0) || 'U'}</div>
                                                 <div>
-                                                    <div className="user-name">{user.name}</div>
+                                                    <div className="user-name">{user.fullName}</div>
                                                     <div className="user-email">{user.email}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{user.phone}</td>
+                                        <td>{user.phoneNumber}</td>
                                         <td>
                                             <Badge variant={
-                                                user.kycStatus === 'verified' ? 'success' :
-                                                    user.kycStatus === 'rejected' ? 'error' :
+                                                user.kycStatus === 'VERIFIED' ? 'success' :
+                                                    user.kycStatus === 'REJECTED' ? 'error' :
                                                         'warning'
                                             }>
                                                 {user.kycStatus}
@@ -150,19 +150,19 @@ const Users = () => {
                                             />
                                         </td>
                                         <td>
-                                            <Badge variant={user.accountStatus === 'active' ? 'success' : 'error'}>
-                                                {user.accountStatus}
+                                            <Badge variant={user.isBlocked ? 'error' : 'success'}>
+                                                {user.isBlocked ? 'BLOCKED' : 'ACTIVE'}
                                             </Badge>
                                         </td>
                                         <td>{formatDate(user.createdAt)}</td>
                                         <td>
                                             <div className="action-buttons">
-                                                {user.kycStatus === 'pending' && (
+                                                {user.kycStatus === 'PENDING' && (
                                                     <>
                                                         <Button
                                                             size="sm"
                                                             variant="success"
-                                                            onClick={() => handleKYCUpdate(user._id, 'verified')}
+                                                            onClick={() => handleKYCUpdate(user._id, 'VERIFIED')}
                                                         >
                                                             Verify
                                                         </Button>
@@ -171,7 +171,7 @@ const Users = () => {
                                                             variant="danger"
                                                             onClick={() => {
                                                                 const reason = prompt('Enter rejection reason:');
-                                                                if (reason) handleKYCUpdate(user._id, 'rejected', reason);
+                                                                if (reason) handleKYCUpdate(user._id, 'REJECTED', reason);
                                                             }}
                                                         >
                                                             Reject
@@ -180,10 +180,10 @@ const Users = () => {
                                                 )}
                                                 <Button
                                                     size="sm"
-                                                    variant={user.accountStatus === 'active' ? 'danger' : 'success'}
-                                                    onClick={() => handleBlockUser(user._id, user.accountStatus === 'active')}
+                                                    variant={!user.isBlocked ? 'danger' : 'success'}
+                                                    onClick={() => handleBlockUser(user._id, !user.isBlocked)}
                                                 >
-                                                    {user.accountStatus === 'active' ? 'Block' : 'Unblock'}
+                                                    {!user.isBlocked ? 'Block' : 'Unblock'}
                                                 </Button>
                                             </div>
                                         </td>

@@ -1,69 +1,225 @@
 const mongoose = require('mongoose');
 
 const loanSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    phoneNumber: {
+        type: String,
+        required: true,
+        trim: true,
     },
+
     amount: {
         type: Number,
-        required: [true, 'Please provide loan amount']
+        required: true,
+        min: 0,
     },
+    tenureDays: {
+        type: Number,
+        required: true,
+        enum: [7, 15, 30, 45, 60],
+    },
+
     interestRate: {
         type: Number,
-        required: [true, 'Please provide interest rate'],
-        default: 12
+        default: 0,
     },
-    tenure: {
+    interestAmount: {
         type: Number,
-        required: [true, 'Please provide tenure in months']
+        default: 0,
     },
-    purpose: {
+    interestCalculationMethod: {
         type: String,
-        required: [true, 'Please provide loan purpose']
+        enum: ['SIMPLE', 'COMPOUND'],
+        default: 'SIMPLE',
     },
+    interestBasis: {
+        type: String,
+        enum: ['DAILY', 'MONTHLY', 'YEARLY'],
+        default: 'DAILY',
+    },
+    loanReferenceNumber: {
+        type: String,
+        unique: true,
+        trim: true,
+    },
+    loanPurpose: {
+        type: String,
+        trim: true,
+    },
+    termsAccepted: {
+        type: Boolean,
+        default: false,
+    },
+    termsAcceptedAt: {
+        type: Date,
+    },
+    termsVersion: {
+        type: String,
+        trim: true,
+    },
+    lateFee: {
+        type: Number,
+        default: 0,
+    },
+    lateFeeRate: {
+        type: Number,
+        default: 0,
+    },
+    lateFeeType: {
+        type: String,
+        enum: ['FIXED', 'PER_DAY', 'PERCENTAGE'],
+        default: 'PER_DAY',
+    },
+    totalLateFeeCharged: {
+        type: Number,
+        default: 0,
+    },
+    totalRepayable: {
+        type: Number,
+        required: true,
+    },
+
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected', 'active', 'completed'],
-        default: 'pending'
+        enum: ['REQUESTED', 'APPROVED', 'DISBURSED', 'REPAID', 'OVERDUE', 'REJECTED', 'CANCELLED', 'PREPAID', 'FORECLOSED'],
+        default: 'REQUESTED',
     },
-    approvedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin'
-    },
-    approvedAt: Date,
-    rejectedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin'
-    },
-    rejectedAt: Date,
-    rejectionReason: String,
-    emiAmount: Number,
-    totalAmount: Number,
-    disbursedAt: Date,
-    completedAt: Date,
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
 
-// Calculate EMI and total amount before saving
-loanSchema.pre('save', function (next) {
-    if (this.isModified('amount') || this.isModified('interestRate') || this.isModified('tenure')) {
-        const monthlyRate = this.interestRate / 12 / 100;
-        const emi = (this.amount * monthlyRate * Math.pow(1 + monthlyRate, this.tenure)) /
-            (Math.pow(1 + monthlyRate, this.tenure) - 1);
-        this.emiAmount = Math.round(emi * 100) / 100;
-        this.totalAmount = Math.round(this.emiAmount * this.tenure * 100) / 100;
-    }
-    this.updatedAt = Date.now();
-    next();
+    requestedAt: {
+        type: Date,
+        default: Date.now,
+    },
+    approvedAt: {
+        type: Date,
+    },
+    disbursementDate: {
+        type: Date,
+    },
+    dueDate: {
+        type: Date,
+    },
+    repaidAt: {
+        type: Date,
+    },
+
+    razorpayPaymentId: {
+        type: String,
+        trim: true,
+    },
+    razorpayOrderId: {
+        type: String,
+        trim: true,
+    },
+    cashfreePaymentId: {
+        type: String,
+        trim: true,
+    },
+
+    disbursementAccount: {
+        accountNumber: String,
+        ifscCode: String,
+        accountHolderName: String,
+    },
+
+    rejectionReason: {
+        type: String,
+        trim: true,
+    },
+
+    approvedBy: {
+        type: String,
+        trim: true,
+    },
+
+    adminNotes: {
+        type: String,
+        trim: true,
+    },
+    repaymentScheduleId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RepaymentSchedule',
+    },
+    principalAmount: {
+        type: Number,
+        min: 0,
+    },
+    emiAmount: {
+        type: Number,
+        default: 0,
+    },
+    remainingAmount: {
+        type: Number,
+        default: 0,
+    },
+    daysOverdue: {
+        type: Number,
+        default: 0,
+    },
+    lastReminderSent: {
+        type: Date,
+    },
+    reminderCount: {
+        type: Number,
+        default: 0,
+    },
+    preclosureCharge: {
+        type: Number,
+        default: 0,
+    },
+    preclosureChargeRate: {
+        type: Number,
+        default: 0,
+    },
+    prepaymentAmount: {
+        type: Number,
+        default: 0,
+    },
+    prepaymentDate: {
+        type: Date,
+    },
+    foreclosureAmount: {
+        type: Number,
+        default: 0,
+    },
+    foreclosureDate: {
+        type: Date,
+    },
+    foreclosureCharge: {
+        type: Number,
+        default: 0,
+    },
+    isPrepaid: {
+        type: Boolean,
+        default: false,
+    },
+    isForeclosed: {
+        type: Boolean,
+        default: false,
+    },
+    loanHistory: [
+        {
+            status: {
+                type: String,
+                required: true,
+            },
+            changedAt: {
+                type: Date,
+                default: Date.now,
+            },
+            changedBy: {
+                type: String,
+                trim: true,
+            },
+            reason: {
+                type: String,
+                trim: true,
+            },
+            metadata: {
+                type: mongoose.Schema.Types.Mixed,
+            },
+        },
+    ],
+}, {
+    timestamps: true,
 });
 
 module.exports = mongoose.model('Loan', loanSchema);

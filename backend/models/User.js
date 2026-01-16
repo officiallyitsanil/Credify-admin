@@ -1,77 +1,146 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    name: {
+    phoneNumber: {
         type: String,
-        required: [true, 'Please provide a name'],
-        trim: true
+        required: true,
+        unique: true,
+        trim: true,
+    },
+    fullName: {
+        type: String,
+        trim: true,
     },
     email: {
         type: String,
-        required: [true, 'Please provide an email'],
-        unique: true,
+        trim: true,
         lowercase: true,
-        trim: true
     },
-    phone: {
+    kycDocs: {
+        panCardUrl: {
+            type: String,
+            trim: true,
+        },
+        aadharCardUrl: {
+            type: String,
+            trim: true,
+        },
+        selfieUrl: {
+            type: String,
+            trim: true,
+        },
+    },
+    kycStatus: {
         type: String,
-        required: [true, 'Please provide a phone number'],
-        trim: true
+        enum: ['PENDING', 'VERIFIED', 'REJECTED'],
+        default: 'PENDING',
+    },
+    creditLimit: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false,
+    },
+    dateOfBirth: {
+        type: Date,
     },
     address: {
         street: String,
         city: String,
         state: String,
-        zipCode: String,
-        country: { type: String, default: 'India' }
+        pincode: String,
     },
-    dateOfBirth: {
-        type: Date
+    lastLogin: {
+        type: Date,
+        default: Date.now,
     },
-    kycStatus: {
+    kycRejectionReason: {
         type: String,
-        enum: ['pending', 'verified', 'rejected'],
-        default: 'pending'
+        trim: true,
     },
-    kycDocuments: {
-        idProof: {
-            type: String,
-            url: String
-        },
-        addressProof: {
-            type: String,
-            url: String
-        },
-        photo: {
-            type: String,
-            url: String
-        }
-    },
-    kycRejectionReason: String,
-    creditLimit: {
+    usedCredit: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0,
     },
-    accountStatus: {
-        type: String,
-        enum: ['active', 'blocked'],
-        default: 'active'
+    cibilScore: {
+        type: Number,
+        min: 300,
+        max: 900,
     },
-    blockReason: String,
-    createdAt: {
+    cibilScoreUpdatedAt: {
         type: Date,
-        default: Date.now
     },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+    bankDetails: {
+        accountNumber: {
+            type: String,
+            trim: true,
+        },
+        ifscCode: {
+            type: String,
+            trim: true,
+            uppercase: true,
+        },
+        accountHolderName: {
+            type: String,
+            trim: true,
+        },
+        bankName: {
+            type: String,
+            trim: true,
+        },
+        branchName: {
+            type: String,
+            trim: true,
+        },
+        accountType: {
+            type: String,
+            enum: ['SAVINGS', 'CURRENT', 'SALARY'],
+        },
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        verifiedAt: {
+            type: Date,
+        },
+    },
+    creditLimitHistory: [
+        {
+            previousLimit: {
+                type: Number,
+                default: 0,
+            },
+            newLimit: {
+                type: Number,
+                required: true,
+            },
+            changedAt: {
+                type: Date,
+                default: Date.now,
+            },
+            changedBy: {
+                type: String,
+                trim: true,
+            },
+            reason: {
+                type: String,
+                trim: true,
+            },
+        },
+    ],
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
 });
 
-// Update the updatedAt field before saving
-userSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
-    next();
+// Virtual for available credit
+userSchema.virtual('availableCredit').get(function () {
+    return Math.max(0, (this.creditLimit || 0) - (this.usedCredit || 0));
 });
 
 module.exports = mongoose.model('User', userSchema);

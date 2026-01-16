@@ -157,11 +157,11 @@ const Dashboard = () => {
                                     <div key={loan._id} className="activity-item">
                                         <div className="activity-user">
                                             <div className="activity-avatar">
-                                                {loan.user?.name?.charAt(0) || 'U'}
+                                                {loan.user?.name?.charAt(0) || loan.phoneNumber?.charAt(4) || 'U'}
                                             </div>
                                             <div className="activity-info">
-                                                <div className="activity-name">{loan.user?.name || 'Unknown User'}</div>
-                                                <div className="activity-email">{loan.user?.email || ''}</div>
+                                                <div className="activity-name">{loan.user?.name || loan.phoneNumber}</div>
+                                                <div className="activity-email">{loan.user?.email || loan.loanReferenceNumber || ''}</div>
                                             </div>
                                         </div>
                                         <div className="activity-amount">
@@ -169,8 +169,8 @@ const Dashboard = () => {
                                         </div>
                                         <div className="activity-status">
                                             <Badge variant={
-                                                loan.status === 'approved' ? 'success' :
-                                                    loan.status === 'rejected' ? 'error' :
+                                                loan.status === 'APPROVED' || loan.status === 'DISBURSED' || loan.status === 'REPAID' ? 'success' :
+                                                    loan.status === 'REJECTED' ? 'error' :
                                                         'warning'
                                             }>
                                                 {loan.status}
