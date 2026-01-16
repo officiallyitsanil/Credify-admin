@@ -10,12 +10,48 @@ import './Login.css';
 
 const Login = () => {
     const navigate = useNavigate();
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('+91 ');
     const [otp, setOtp] = useState('');
     const [verificationId, setVerificationId] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
+
+    // Format phone number with space after 5 digits
+    const formatPhoneNumber = (value) => {
+        // Remove all non-digit characters except +
+        let cleaned = value.replace(/[^\d+]/g, '');
+
+        // Ensure it starts with +91
+        if (!cleaned.startsWith('+91')) {
+            cleaned = '+91';
+        }
+
+        // Extract only the digits after +91
+        const digits = cleaned.substring(3);
+
+        // Format: +91 XXXXX XXXXX (space after 5 digits)
+        if (digits.length > 5) {
+            return `+91 ${digits.substring(0, 5)} ${digits.substring(5, 10)}`;
+        } else if (digits.length > 0) {
+            return `+91 ${digits}`;
+        }
+
+        return '+91 ';
+    };
+
+    const handlePhoneChange = (e) => {
+        const input = e.target.value;
+
+        // Don't allow deleting +91
+        if (!input.startsWith('+91')) {
+            setPhoneNumber('+91 ');
+            return;
+        }
+
+        const formatted = formatPhoneNumber(input);
+        setPhoneNumber(formatted);
+    };
 
     // Setup reCAPTCHA verifier
     const setupRecaptcha = () => {
@@ -35,8 +71,11 @@ const Login = () => {
         setLoading(true);
 
         try {
-            // Phone number must be in international format (e.g., +1234567890)
-            if (!phoneNumber.startsWith('+')) {
+            // Remove spaces for API call
+            const cleanedPhone = phoneNumber.replace(/\s/g, '');
+
+            // Phone number must be in international format (e.g., +91XXXXXXXXXX)
+            if (!cleanedPhone.startsWith('+')) {
                 setError('Phone number must start with country code (e.g., +91)');
                 setLoading(false);
                 return;
@@ -44,8 +83,8 @@ const Login = () => {
 
             // First, check if phone number is authorized in database
             try {
-                console.log('Checking phone number authorization:', phoneNumber);
-                await adminAPI.checkPhone({ phoneNumber });
+                console.log('Checking phone number authorization:', cleanedPhone);
+                await adminAPI.checkPhone({ phoneNumber: cleanedPhone });
                 console.log('Phone number authorized');
             } catch (checkErr) {
                 console.error('Phone check failed:', checkErr);
@@ -57,7 +96,7 @@ const Login = () => {
             // If authorized, proceed with Firebase OTP
             setupRecaptcha();
             const appVerifier = window.recaptchaVerifier;
-            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+            const confirmationResult = await signInWithPhoneNumber(auth, cleanedPhone, appVerifier);
 
             setVerificationId(confirmationResult);
             setOtpSent(true);
@@ -147,12 +186,13 @@ const Login = () => {
                                 id="phoneNumber"
                                 name="phoneNumber"
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                placeholder="+911234567890"
+                                onChange={handlePhoneChange}
+                                placeholder="+91 12345 67890"
+                                maxLength="17"
                                 required
                             />
                             <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                                Include country code (e.g., +91 for India)
+                                Enter 10-digit mobile number
                             </small>
                         </div>
 
@@ -218,6 +258,7 @@ const Login = () => {
                                 setOtpSent(false);
                                 setOtp('');
                                 setVerificationId(null);
+                                setPhoneNumber('+91 ');
                             }}
                             style={{ marginTop: '10px' }}
                         >
