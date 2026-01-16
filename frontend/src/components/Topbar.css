@@ -119,6 +119,11 @@
 @media (max-width: 768px) {
     .topbar {
         padding: 0 var(--spacing-lg);
+        height: 70px;
+    }
+
+    .topbar-title {
+        font-size: 1.25rem;
     }
 
     .topbar-search {
@@ -127,5 +132,42 @@
 
     .topbar-profile-info {
         display: none;
+    }
+
+    .topbar-icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .topbar-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .topbar {
+        padding: 0 var(--spacing-md);
+        height: 60px;
+    }
+
+    .topbar-title {
+        font-size: 1.125rem;
+    }
+
+    .topbar-right {
+        gap: var(--spacing-sm);
+    }
+
+    .topbar-icon-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .topbar-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
     }
 }

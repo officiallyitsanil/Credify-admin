@@ -20,11 +20,13 @@
 
 .repayments-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .repayments-table table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 850px; /* Force minimum width for better mobile scrolling */
 }
 
 .repayments-table th {
@@ -76,4 +78,51 @@
     .repayments-content {
         padding: var(--spacing-lg);
     }
+
+    .repayments-table {
+        font-size: 0.875rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .repayments-table th,
+    .repayments-table td {
+        padding: var(--spacing-sm);
+        font-size: 0.8125rem;
+        white-space: nowrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .repayments-filters {
+        gap: var(--spacing-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .repayments-content {
+        padding: var(--spacing-sm);
+    }
+
+    .repayments-table {
+        font-size: 0.8125rem;
+    }
+    
+    .repayments-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .repayments-filters {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .filter-btn {
+        width: 100%;
+        min-height: 44px; /* Touch-friendly */
+    }
+}
 }

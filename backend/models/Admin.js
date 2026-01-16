@@ -6,11 +6,25 @@ const adminSchema = new mongoose.Schema({
         required: [true, 'Please provide a name'],
         trim: true
     },
+    email: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
     phoneNumber: {
         type: String,
         required: [true, 'Please provide a phone number'],
         unique: true,
         trim: true
+    },
+    profilePhoto: {
+        type: String,
+        default: ''
+    },
+    bio: {
+        type: String,
+        trim: true,
+        maxlength: 500
     },
     firebaseUid: {
         type: String,

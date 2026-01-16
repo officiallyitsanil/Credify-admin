@@ -117,13 +117,35 @@
     margin-bottom: 0.5rem;
 }
 
+@media (max-width: 768px) {
+    .login-logo-img {
+        height: 120px;
+    }
+
+    .login-header h2 {
+        font-size: 1.25rem;
+    }
+}
+
 @media (max-width: 480px) {
+    .login-container {
+        padding: var(--spacing-md);
+    }
+
     .login-card {
         max-width: 100%;
     }
 
     .login-header {
         padding: var(--spacing-xl) var(--spacing-lg);
+    }
+
+    .login-logo-img {
+        height: 100px;
+    }
+
+    .login-header h2 {
+        font-size: 1.125rem;
     }
 
     .login-form {

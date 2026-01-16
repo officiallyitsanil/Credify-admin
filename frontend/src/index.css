@@ -111,6 +111,7 @@ input, textarea, select {
   padding: 0.75rem 1rem;
   transition: all 0.2s ease;
   outline: none;
+  width: 100%;
 }
 
 input:focus, textarea:focus, select:focus {
@@ -196,5 +197,56 @@ input:focus, textarea:focus, select:focus {
 
 .spin {
   animation: spin 1s linear infinite;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.9375rem; }
+  
+  /* Better touch targets on tablets */
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px; /* Slightly smaller base font */
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
+  h4 { font-size: 1rem; }
+  h5 { font-size: 0.9375rem; }
+  h6 { font-size: 0.875rem; }
+
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  /* Touch-friendly inputs on mobile */
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 0.625rem 0.875rem;
+  }
+  
+  /* Better card spacing */
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  /* Prevent text overflow */
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 }
 

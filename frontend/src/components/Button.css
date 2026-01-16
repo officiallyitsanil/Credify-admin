@@ -83,3 +83,54 @@
 .btn-full {
     width: 100%;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .btn-md {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+        min-height: 44px; /* Touch target minimum */
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9375rem;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-sm {
+        padding: 0.4375rem 0.875rem;
+        font-size: 0.8125rem;
+        min-height: 40px;
+    }
+    
+    .btn-md {
+        padding: 0.5625rem 1rem;
+        font-size: 0.8125rem;
+        min-height: 44px;
+    }
+    
+    .btn-lg {
+        padding: 0.6875rem 1.25rem;
+        font-size: 0.875rem;
+        min-height: 48px;
+    }
+    
+    /* Full width buttons on mobile forms */
+    .login-form .btn,
+    .modal-actions .btn {
+        width: 100%;
+    }
+
+    .btn-md {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+    }
+}

@@ -40,11 +40,13 @@
 
 .users-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .users-table table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px; /* Force minimum width for better mobile scrolling */
 }
 
 .users-table th {
@@ -123,10 +125,73 @@
 
     .users-table {
         font-size: 0.875rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .users-table th,
     .users-table td {
         padding: var(--spacing-sm);
+        font-size: 0.8125rem;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8125rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .credit-input {
+        width: 100%;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-content {
+        padding: var(--spacing-sm);
+    }
+
+    .users-table {
+        font-size: 0.8125rem;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8125rem;
+    }
+
+    .users-filters {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .filter-btn {
+        width: 100%;
+        min-height: 44px; /* Touch-friendly */
+    }
+    
+    .users-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .action-buttons {
+        gap: var(--spacing-xs);
+    }
+    
+    .action-buttons button {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.625rem;
+    }
+}
     }
 }

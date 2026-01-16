@@ -290,6 +290,16 @@
     color: var(--text-secondary);
 }
 
+@media (max-width: 1024px) {
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .dashboard-content {
         padding: var(--spacing-lg);
@@ -297,6 +307,7 @@
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 
     .overview-grid {
@@ -306,10 +317,95 @@
     .activity-item {
         flex-direction: column;
         align-items: flex-start;
+        padding: var(--spacing-sm);
     }
 
     .activity-status {
         width: 100%;
         text-align: left;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .stat-card {
+        padding: var(--spacing-md) !important;
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-content {
+        padding: var(--spacing-md);
+    }
+
+    .stats-grid {
+        gap: var(--spacing-md);
+    }
+
+    .stat-card {
+        padding: var(--spacing-sm) var(--spacing-md) !important;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .activity-user {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        width: 100%;
+    }
+
+    .activity-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8125rem;
+    }
+
+    .activity-name {
+        font-size: 0.875rem;
+    }
+
+    .activity-amount {
+        font-size: 0.875rem;
+    }
+
+    .overview-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .overview-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .overview-amount-value {
+        font-size: 1.5rem;
     }
 }
