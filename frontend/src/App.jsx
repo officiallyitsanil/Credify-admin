@@ -7,6 +7,16 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Loans from './pages/Loans';
 import Repayments from './pages/Repayments';
+import KYC from './pages/KYC';
+import CreditLimit from './pages/CreditLimit';
+import Disbursement from './pages/Disbursement';
+import InterestFees from './pages/InterestFees';
+import Notifications from './pages/Notifications';
+import Collections from './pages/Collections';
+import RiskManagement from './pages/RiskManagement';
+import Support from './pages/Support';
+import CMS from './pages/CMS';
+import Settings from './pages/Settings';
 import './App.css';
 
 // Protected Route Component
@@ -69,6 +79,106 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Repayments />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/kyc"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <KYC />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/credit-limit"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CreditLimit />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/disbursement"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Disbursement />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/interest-fees"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <InterestFees />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Notifications />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/collections"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Collections />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/risk-management"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RiskManagement />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/support"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Support />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cms"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CMS />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Settings />
               </Layout>
             </ProtectedRoute>
           }

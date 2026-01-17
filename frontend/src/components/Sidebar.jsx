@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, CreditCard, UserCircle, LogOut, Menu, X } from 'lucide-react';
+import {
+    LayoutDashboard, Users, FileText, CreditCard, UserCircle, LogOut, Menu, X,
+    ShieldCheck, TrendingUp, Banknote, DollarSign, Bell, PhoneCall, AlertTriangle,
+    LifeBuoy, BookOpen, Settings
+} from 'lucide-react';
 import { logout } from '../utils/auth';
 import ProfileModal from './ProfileModal';
 import './Sidebar.css';
@@ -11,9 +15,19 @@ const Sidebar = () => {
 
     const menuItems = [
         { path: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-        { path: '/users', icon: Users, label: 'Users & KYC' },
-        { path: '/loans', icon: FileText, label: 'Loan Requests' },
-        { path: '/repayments', icon: CreditCard, label: 'Repayments' }
+        { path: '/users', icon: Users, label: 'Users' },
+        { path: '/kyc', icon: ShieldCheck, label: 'KYC Management' },
+        { path: '/credit-limit', icon: TrendingUp, label: 'Credit Limits' },
+        { path: '/loans', icon: FileText, label: 'Loans' },
+        { path: '/disbursement', icon: Banknote, label: 'Disbursements' },
+        { path: '/repayments', icon: CreditCard, label: 'Repayments' },
+        { path: '/interest-fees', icon: DollarSign, label: 'Interest & Fees' },
+        { path: '/notifications', icon: Bell, label: 'Notifications' },
+        { path: '/collections', icon: PhoneCall, label: 'Collections' },
+        { path: '/risk-management', icon: AlertTriangle, label: 'Risk & Fraud' },
+        { path: '/support', icon: LifeBuoy, label: 'Support' },
+        { path: '/cms', icon: BookOpen, label: 'CMS' },
+        { path: '/settings', icon: Settings, label: 'Settings' }
     ];
     // Close mobile menu when clicking outside
     useEffect(() => {

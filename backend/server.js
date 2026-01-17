@@ -20,6 +20,18 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/loans', require('./routes/loans'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/kyc', require('./routes/kyc'));
+app.use('/api/credit-limit', require('./routes/creditLimit'));
+app.use('/api/disbursement', require('./routes/disbursement'));
+app.use('/api/interest-fees', require('./routes/interestFees'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/collection', require('./routes/collection'));
+app.use('/api/risk', require('./routes/risk'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/cms', require('./routes/cms'));
+app.use('/api/audit', require('./routes/audit'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/reports', require('./routes/reports'));
 
 // Health check
 app.get('/api/health', (req, res) => {

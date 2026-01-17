@@ -1,0 +1,163 @@
+.interest-fees-page {
+    padding: 24px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 24px;
+}
+
+.tabs button {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s;
+    margin-bottom: -2px;
+}
+
+.tabs button:hover {
+    color: #4A90E2;
+}
+
+.tabs button.active {
+    color: #4A90E2;
+    border-bottom-color: #4A90E2;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.config-card {
+    padding: 16px;
+}
+
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.config-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.config-details .description {
+    color: #666;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.rates, .fee-amount, .penalty-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.rate-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rate-item .label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.rate-item .value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #4A90E2;
+}
+
+.fee-amount .label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.fee-amount .value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meta p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.meta strong {
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.loading {
+    text-align: center;
+    padding: 48px;
+    color: #666;
+    font-size: 16px;
+}
+
+.no-data {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px;
+    color: #999;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tabs {
+        overflow-x: auto;
+    }
+    
+    .tabs button {
+        white-space: nowrap;
+    }
+}

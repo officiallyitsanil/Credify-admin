@@ -1,0 +1,101 @@
+.credit-limit-page {
+    padding: 20px;
+}
+
+.limits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.limit-card {
+    padding: 20px;
+}
+
+.limit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.limit-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.limit-amounts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.amount-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.amount-item .label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.amount-item .value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.amount-item .value.success {
+    color: #28a745;
+}
+
+.amount-item .value.danger {
+    color: #dc3545;
+}
+
+.limit-meta p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.limit-actions {
+    margin-top: 15px;
+}
+
+.limit-history {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.limit-history h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.history-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.history-item p {
+    margin: 5px 0;
+}
+
+.history-item .reason {
+    font-size: 12px;
+    color: #666;
+}

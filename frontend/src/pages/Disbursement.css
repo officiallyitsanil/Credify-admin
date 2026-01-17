@@ -1,0 +1,66 @@
+.disbursement-page {
+    padding: 20px;
+}
+
+.disbursement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.disbursement-item {
+    padding: 20px;
+}
+
+.disb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.disb-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.loan-ref {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.disb-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.detail-row .label {
+    font-weight: 500;
+    color: #555;
+}
+
+.detail-row .value {
+    color: #2c3e50;
+}
+
+.detail-row .value.amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.detail-row.error .value {
+    color: #dc3545;
+}

@@ -50,3 +50,6 @@ exports.protect = async (req, res, next) => {
         });
     }
 };
+
+// Alias for protect - for admin routes
+exports.verifyAdmin = exports.protect;

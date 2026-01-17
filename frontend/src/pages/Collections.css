@@ -1,0 +1,97 @@
+.collections-page {
+    padding: 20px;
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.collection-card {
+    padding: 20px;
+}
+
+.collection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.collection-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.case-number {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.badges {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+}
+
+.amount-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.amount-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.amount-item .label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.amount-item .value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.amount-item .value.days {
+    color: #ff6b6b;
+}
+
+.meta-info p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.activities {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 5px;
+}
+
+.activities strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #856404;
+}
+
+.activity-note {
+    margin: 0;
+    font-size: 14px;
+    color: #856404;
+}
