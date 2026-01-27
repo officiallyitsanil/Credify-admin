@@ -72,6 +72,11 @@ router.get('/stats', async (req, res) => {
                 }
             },
             {
+                $addFields: {
+                    userDoc: { $arrayElemAt: ['$userInfo', 0] }
+                }
+            },
+            {
                 $project: {
                     amount: 1,
                     status: 1,
@@ -80,13 +85,17 @@ router.get('/stats', async (req, res) => {
                     loanReferenceNumber: 1,
                     user: {
                         $cond: {
-                            if: { $gt: [{ $size: '$userInfo' }, 0] },
+                            if: { $ne: ['$userDoc', null] },
                             then: {
-                                name: { $arrayElemAt: ['$userInfo.fullName', 0] },
-                                email: { $arrayElemAt: ['$userInfo.email', 0] },
-                                phoneNumber: { $arrayElemAt: ['$userInfo.phoneNumber', 0] }
+                                name: '$userDoc.fullName',
+                                email: '$userDoc.email',
+                                phoneNumber: '$userDoc.phoneNumber'
                             },
-                            else: null
+                            else: {
+                                name: null,
+                                email: null,
+                                phoneNumber: '$phoneNumber'
+                            }
                         }
                     }
                 }
@@ -112,6 +121,68 @@ router.get('/stats', async (req, res) => {
             { $sort: { '_id.year': 1, '_id.month': 1 } }
         ]);
 
+        // Loan Approval Statistics
+        const underReviewLoans = await Loan.countDocuments({ status: 'UNDER_REVIEW' });
+        const autoApprovedLoans = await Loan.countDocuments({ 
+            approvalMethod: 'AUTO',
+            status: { $in: ['APPROVED', 'DISBURSED', 'REPAID'] }
+        });
+        const manualApprovedLoans = await Loan.countDocuments({ 
+            approvalMethod: 'MANUAL',
+            status: { $in: ['APPROVED', 'DISBURSED', 'REPAID'] }
+        });
+        const autoRejectedLoans = await Loan.countDocuments({ 
+            approvalMethod: 'AUTO',
+            status: 'REJECTED'
+        });
+
+        // Risk Score Distribution
+        const riskDistribution = await Loan.aggregate([
+            { $match: { riskScore: { $exists: true, $ne: null } } },
+            {
+                $group: {
+                    _id: '$riskCategory',
+                    count: { $sum: 1 },
+                    avgScore: { $avg: '$riskScore' }
+                }
+            }
+        ]);
+
+        // Average risk score by approval method
+        const avgRiskByMethod = await Loan.aggregate([
+            { $match: { riskScore: { $exists: true, $ne: null } } },
+            {
+                $group: {
+                    _id: '$approvalMethod',
+                    avgRiskScore: { $avg: '$riskScore' },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Recent manual review requests
+        const manualReviewQueue = await Loan.find({
+            status: 'UNDER_REVIEW',
+            manualReviewRequired: true
+        })
+            .sort({ requestedAt: -1 })
+            .limit(5)
+            .select('phoneNumber amount riskScore riskCategory riskFactors requestedAt');
+
+        // Approval rate calculation
+        const totalProcessedLoans = await Loan.countDocuments({ 
+            approvalMethod: { $exists: true, $ne: null }
+        });
+        const totalApproved = autoApprovedLoans + manualApprovedLoans;
+        const approvalRate = totalProcessedLoans > 0 
+            ? ((totalApproved / totalProcessedLoans) * 100).toFixed(1)
+            : 0;
+
+        // Auto-approval efficiency
+        const autoApprovalRate = totalProcessedLoans > 0
+            ? ((autoApprovedLoans / totalProcessedLoans) * 100).toFixed(1)
+            : 0;
+
         res.status(200).json({
             success: true,
             data: {
@@ -130,6 +201,25 @@ router.get('/stats', async (req, res) => {
                     rejected: rejectedLoans,
                     totalAmount: totalLoanAmount[0]?.total || 0,
                     activeAmount: activeLoanAmount[0]?.total || 0
+                },
+                approval: {
+                    underReview: underReviewLoans,
+                    autoApproved: autoApprovedLoans,
+                    manualApproved: manualApprovedLoans,
+                    autoRejected: autoRejectedLoans,
+                    approvalRate: parseFloat(approvalRate),
+                    autoApprovalRate: parseFloat(autoApprovalRate),
+                    riskDistribution: riskDistribution.map(r => ({
+                        category: r._id || 'Unknown',
+                        count: r.count,
+                        avgScore: Math.round(r.avgScore)
+                    })),
+                    avgRiskByMethod: avgRiskByMethod.map(r => ({
+                        method: r._id || 'Unknown',
+                        avgScore: Math.round(r.avgRiskScore),
+                        count: r.count
+                    })),
+                    manualReviewQueue: manualReviewQueue
                 },
                 repayments: {
                     overdue: overdueRepayments,

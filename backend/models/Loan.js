@@ -80,7 +80,7 @@ const loanSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ['REQUESTED', 'APPROVED', 'DISBURSED', 'REPAID', 'OVERDUE', 'REJECTED', 'CANCELLED', 'PREPAID', 'FORECLOSED'],
+        enum: ['REQUESTED', 'APPROVED', 'DISBURSED', 'REPAID', 'OVERDUE', 'REJECTED', 'CANCELLED', 'PREPAID', 'FORECLOSED', 'UNDER_REVIEW'],
         default: 'REQUESTED',
     },
 
@@ -134,6 +134,49 @@ const loanSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+
+    // Risk Assessment Fields
+    riskScore: {
+        type: Number,
+        min: 0,
+        max: 100,
+        description: 'Calculated risk score at time of application'
+    },
+    riskCategory: {
+        type: String,
+        enum: ['LOW', 'MEDIUM', 'HIGH'],
+        description: 'Risk category based on assessment'
+    },
+    riskFactors: {
+        type: [String],
+        description: 'List of factors contributing to risk score'
+    },
+    approvalMethod: {
+        type: String,
+        enum: ['AUTO', 'MANUAL', 'HYBRID'],
+        description: 'How the loan was approved'
+    },
+    autoApprovalEligible: {
+        type: Boolean,
+        default: false,
+        description: 'Whether loan was eligible for auto-approval'
+    },
+    manualReviewRequired: {
+        type: Boolean,
+        default: false
+    },
+    manualReviewReason: {
+        type: String,
+        trim: true
+    },
+    reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin'
+    },
+    reviewedAt: {
+        type: Date
+    },
+
     repaymentScheduleId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'RepaymentSchedule',

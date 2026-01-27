@@ -44,6 +44,40 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    blockedAt: {
+        type: Date,
+    },
+    blockReason: {
+        type: String,
+        trim: true,
+    },
+    fraudFlag: {
+        type: Boolean,
+        default: false,
+        description: 'Flag indicating potential fraudulent activity'
+    },
+    fraudFlagReason: {
+        type: String,
+        trim: true,
+    },
+    fraudFlaggedAt: {
+        type: Date,
+    },
+    multipleAccountsFlag: {
+        type: Boolean,
+        default: false,
+        description: 'Flag for multiple accounts from same device'
+    },
+    suspiciousActivityFlag: {
+        type: Boolean,
+        default: false,
+        description: 'Flag for suspicious behavioral patterns'
+    },
+    deviceFingerprint: {
+        type: String,
+        trim: true,
+        description: 'Unique device identifier for fraud detection'
+    },
     dateOfBirth: {
         type: Date,
     },

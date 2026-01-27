@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Loan = require('../models/Loan');
 const Repayment = require('../models/Repayment');
+const LoanSettings = require('../models/LoanSettings');
 const { protect } = require('../middleware/auth');
+const { processLoanApproval } = require('../utils/loanApproval');
 
 // All routes are protected
 router.use(protect);
@@ -76,7 +78,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // @route   PUT /api/loans/:id/approve
-// @desc    Approve loan request
+// @desc    Approve loan request (Manual approval by admin)
 // @access  Private
 router.put('/:id/approve', async (req, res) => {
     try {
@@ -89,10 +91,10 @@ router.put('/:id/approve', async (req, res) => {
             });
         }
 
-        if (loan.status !== 'REQUESTED') {
+        if (loan.status !== 'REQUESTED' && loan.status !== 'UNDER_REVIEW') {
             return res.status(400).json({
                 success: false,
-                message: 'Only pending loans can be approved'
+                message: 'Only pending or under-review loans can be approved'
             });
         }
 
@@ -117,6 +119,9 @@ router.put('/:id/approve', async (req, res) => {
 
         loan.status = 'APPROVED';
         loan.approvedAt = Date.now();
+        loan.approvalMethod = 'MANUAL';
+        loan.reviewedBy = req.user._id; // Assuming admin ID is in req.user
+        loan.reviewedAt = Date.now();
 
         await loan.save();
 
@@ -151,6 +156,120 @@ router.put('/:id/approve', async (req, res) => {
     }
 });
 
+// @route   POST /api/loans/:id/auto-process
+// @desc    Process loan application with automatic risk assessment
+// @access  Private (Can be called automatically when loan is created)
+router.post('/:id/auto-process', async (req, res) => {
+    try {
+        const loan = await Loan.findById(req.params.id);
+
+        if (!loan) {
+            return res.status(404).json({
+                success: false,
+                message: 'Loan not found'
+            });
+        }
+
+        if (loan.status !== 'REQUESTED') {
+            return res.status(400).json({
+                success: false,
+                message: 'Loan has already been processed'
+            });
+        }
+
+        // Get active loan settings
+        const settings = await LoanSettings.getActiveSettings();
+
+        // Process loan approval
+        const result = await processLoanApproval(loan, settings);
+
+        // Update loan with risk assessment data
+        loan.riskScore = result.riskAssessment?.riskScore;
+        loan.riskCategory = result.riskAssessment?.riskCategory;
+        loan.riskFactors = result.riskAssessment?.riskFactors;
+
+        switch (result.action) {
+            case 'AUTO_APPROVE':
+                loan.status = 'APPROVED';
+                loan.approvedAt = Date.now();
+                loan.approvalMethod = 'AUTO';
+                loan.autoApprovalEligible = true;
+
+                // Create repayment schedule
+                const User = require('../models/User');
+                const user = await User.findOne({ phoneNumber: loan.phoneNumber });
+
+                if (user) {
+                    const dueDate = new Date();
+                    dueDate.setDate(dueDate.getDate() + loan.tenureDays);
+
+                    await Repayment.create({
+                        loan: loan._id,
+                        user: user._id,
+                        emiNumber: 1,
+                        emiAmount: loan.totalRepayable,
+                        dueDate: dueDate,
+                        status: 'pending'
+                    });
+
+                    // Update user's used credit
+                    user.usedCredit = (user.usedCredit || 0) + loan.amount;
+                    await user.save();
+                }
+                break;
+
+            case 'MANUAL_REVIEW':
+                loan.status = 'UNDER_REVIEW';
+                loan.manualReviewRequired = true;
+                loan.manualReviewReason = result.message;
+                break;
+
+            case 'AUTO_REJECT':
+                loan.status = 'REJECTED';
+                loan.rejectionReason = result.message;
+                loan.rejectedAt = Date.now();
+                loan.approvalMethod = 'AUTO';
+                break;
+        }
+
+        // Add to loan history
+        loan.loanHistory.push({
+            status: loan.status,
+            changedAt: Date.now(),
+            changedBy: 'SYSTEM',
+            reason: result.message,
+            metadata: {
+                action: result.action,
+                riskScore: result.riskAssessment?.riskScore,
+                riskCategory: result.riskAssessment?.riskCategory
+            }
+        });
+
+        await loan.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                loan,
+                decision: {
+                    action: result.action,
+                    status: result.status,
+                    message: result.message,
+                    riskAssessment: result.riskAssessment
+                }
+            },
+            message: result.message
+        });
+    } catch (err) {
+        console.error('Error in auto-process:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: err.message
+        });
+    }
+});
+
 // @route   PUT /api/loans/:id/reject
 // @desc    Reject loan request
 // @access  Private
@@ -174,16 +293,27 @@ router.put('/:id/reject', async (req, res) => {
             });
         }
 
-        if (loan.status !== 'REQUESTED') {
+        if (loan.status !== 'REQUESTED' && loan.status !== 'UNDER_REVIEW') {
             return res.status(400).json({
                 success: false,
-                message: 'Only pending loans can be rejected'
+                message: 'Only pending or under-review loans can be rejected'
             });
         }
 
         loan.status = 'REJECTED';
         loan.rejectedAt = Date.now();
         loan.rejectionReason = rejectionReason;
+        loan.approvalMethod = loan.approvalMethod || 'MANUAL';
+        loan.reviewedBy = req.user._id;
+        loan.reviewedAt = Date.now();
+
+        // Add to loan history
+        loan.loanHistory.push({
+            status: 'REJECTED',
+            changedAt: Date.now(),
+            changedBy: req.user.email || req.user._id.toString(),
+            reason: rejectionReason
+        });
 
         await loan.save();
 
@@ -191,6 +321,43 @@ router.put('/:id/reject', async (req, res) => {
             success: true,
             data: loan,
             message: 'Loan rejected successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: err.message
+        });
+    }
+});
+
+// @route   GET /api/loans/manual-review/pending
+// @desc    Get all loans requiring manual review
+// @access  Private
+router.get('/manual-review/pending', async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+
+        const loans = await Loan.find({ 
+            status: 'UNDER_REVIEW',
+            manualReviewRequired: true
+        })
+            .sort({ requestedAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .exec();
+
+        const count = await Loan.countDocuments({ 
+            status: 'UNDER_REVIEW',
+            manualReviewRequired: true
+        });
+
+        res.status(200).json({
+            success: true,
+            data: loans,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            total: count
         });
     } catch (err) {
         res.status(500).json({

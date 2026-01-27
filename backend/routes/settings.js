@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { SystemSettings } = require('../models/CMSAuditSettings');
+const LoanSettings = require('../models/LoanSettings');
 const { verifyAdmin } = require('../middleware/auth');
 
 // Get all settings
@@ -165,6 +166,80 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
         res.json({ message: 'Setting deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+// ==================== LOAN SETTINGS ROUTES ====================
+
+// Get active loan settings
+router.get('/loan', verifyAdmin, async (req, res) => {
+    try {
+        const settings = await LoanSettings.getActiveSettings();
+        res.json({
+            success: true,
+            data: settings
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false,
+            message: error.message 
+        });
+    }
+});
+
+// Update loan settings
+router.put('/loan', verifyAdmin, async (req, res) => {
+    try {
+        let settings = await LoanSettings.findOne({ isActive: true });
+
+        if (!settings) {
+            // Create new settings if none exist
+            settings = new LoanSettings(req.body);
+            settings.isActive = true;
+        } else {
+            // Update existing settings
+            Object.assign(settings, req.body);
+        }
+
+        settings.lastModifiedBy = req.user._id;
+        await settings.save();
+
+        res.json({
+            success: true,
+            data: settings,
+            message: 'Loan settings updated successfully'
+        });
+    } catch (error) {
+        res.status(400).json({ 
+            success: false,
+            message: error.message 
+        });
+    }
+});
+
+// Reset loan settings to defaults
+router.post('/loan/reset', verifyAdmin, async (req, res) => {
+    try {
+        // Deactivate all existing settings
+        await LoanSettings.updateMany({}, { isActive: false });
+
+        // Create new default settings
+        const settings = await LoanSettings.create({
+            isActive: true,
+            lastModifiedBy: req.user._id,
+            notes: 'Settings reset to defaults by admin'
+        });
+
+        res.json({
+            success: true,
+            data: settings,
+            message: 'Loan settings reset to defaults'
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false,
+            message: error.message 
+        });
     }
 });
 
