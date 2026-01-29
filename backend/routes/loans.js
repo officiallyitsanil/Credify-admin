@@ -105,7 +105,7 @@ router.put('/:id/approve', async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found for this loan application'
             });
         }
 
@@ -113,34 +113,53 @@ router.put('/:id/approve', async (req, res) => {
         if (loan.amount > user.creditLimit) {
             return res.status(400).json({
                 success: false,
-                message: 'Loan amount exceeds user credit limit'
+                message: `Loan amount (₹${loan.amount}) exceeds user credit limit (₹${user.creditLimit})`
             });
         }
 
+        // Update loan status
         loan.status = 'APPROVED';
         loan.approvedAt = Date.now();
         loan.approvalMethod = 'MANUAL';
-        loan.reviewedBy = req.user._id; // Assuming admin ID is in req.user
+        if (req.user && req.user._id) {
+            loan.reviewedBy = req.user._id;
+        }
         loan.reviewedAt = Date.now();
 
         await loan.save();
 
         // Create repayment schedule
-        const repayments = [];
+        const RepaymentSchedule = require('../models/RepaymentSchedule');
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + loan.tenureDays);
 
-        // For simplicity, creating single repayment for full amount
-        repayments.push({
-            loan: loan._id,
-            user: user._id,
-            emiNumber: 1,
-            emiAmount: loan.totalRepayable,
-            dueDate: dueDate,
-            status: 'pending'
+        // Create repayment schedule entry with installments
+        const repaymentSchedule = new RepaymentSchedule({
+            loanId: loan._id,
+            phoneNumber: loan.phoneNumber,
+            totalAmount: loan.totalRepayable,
+            totalPaid: 0,
+            totalRemaining: loan.totalRepayable,
+            status: 'ACTIVE',
+            nextDueDate: dueDate,
+            installments: [
+                {
+                    installmentNumber: 1,
+                    dueDate: dueDate,
+                    principalAmount: loan.amount,
+                    interestAmount: loan.interestAmount,
+                    lateFee: 0,
+                    totalAmount: loan.totalRepayable,
+                    paidAmount: 0,
+                    remainingAmount: loan.totalRepayable,
+                    status: 'PENDING',
+                    daysOverdue: 0,
+                    reminderSent: false
+                }
+            ]
         });
 
-        await Repayment.insertMany(repayments);
+        await repaymentSchedule.save();
 
         res.status(200).json({
             success: true,
@@ -148,13 +167,16 @@ router.put('/:id/approve', async (req, res) => {
             message: 'Loan approved successfully'
         });
     } catch (err) {
+        console.error('Error approving loan:', err);
         res.status(500).json({
             success: false,
-            message: 'Server error',
+            message: 'Failed to approve loan',
             error: err.message
         });
     }
 });
+
+// @route   PUT /api/loans/:id/reject
 
 // @route   POST /api/loans/:id/auto-process
 // @desc    Process loan application with automatic risk assessment

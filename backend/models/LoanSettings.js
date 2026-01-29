@@ -80,6 +80,41 @@ const loanSettingsSchema = new mongoose.Schema({
         default: [7, 15, 30, 45, 60]
     },
 
+    // Interest Rate Configuration
+    interestRate: {
+        type: Number,
+        default: 2.5,
+        min: 0,
+        max: 100,
+        description: 'Annual interest rate percentage'
+    },
+    interestCalculationMethod: {
+        type: String,
+        enum: ['SIMPLE', 'COMPOUND'],
+        default: 'SIMPLE',
+        description: 'Method to calculate interest'
+    },
+    interestBasis: {
+        type: String,
+        enum: ['DAILY', 'MONTHLY', 'YEARLY'],
+        default: 'DAILY',
+        description: 'Basis for interest calculation'
+    },
+
+    // Late Fee Configuration
+    lateFeeRate: {
+        type: Number,
+        default: 100,
+        min: 0,
+        description: 'Late fee amount or percentage'
+    },
+    lateFeeType: {
+        type: String,
+        enum: ['FIXED', 'PER_DAY', 'PERCENTAGE'],
+        default: 'PER_DAY',
+        description: 'Type of late fee calculation'
+    },
+
     // Device & Behavior Settings
     enableDeviceCheck: {
         type: Boolean,

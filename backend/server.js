@@ -19,6 +19,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/loans', require('./routes/loans'));
+app.use('/api/loan-application', require('./routes/loanApplication')); // Public loan application route
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/kyc', require('./routes/kyc'));
 app.use('/api/credit-limit', require('./routes/creditLimit'));

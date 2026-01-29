@@ -69,6 +69,12 @@ export const loansAPI = {
     getRepayments: (id) => api.get(`/loans/${id}/repayments`)
 };
 
+export const loanApplicationAPI = {
+    apply: (data) => axios.post(`${API_URL}/loan-application/apply`, data),
+    getStatus: (phoneNumber) => axios.get(`${API_URL}/loan-application/status/${phoneNumber}`),
+    getSettings: () => axios.get(`${API_URL}/loan-application/settings`)
+};
+
 export const dashboardAPI = {
     getStats: () => api.get('/dashboard/stats'),
     getRepayments: (params) => api.get('/dashboard/repayments', { params })

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { isAuthenticated } from './utils/auth';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
+import LoanApplication from './pages/LoanApplication';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Loans from './pages/Loans';
@@ -42,7 +43,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/apply-loan" element={<LoanApplication />} />
+        
+        {/* Protected Admin Routes */}
         <Route
           path="/"
           element={
