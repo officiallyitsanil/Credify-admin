@@ -296,4 +296,47 @@ router.put('/:id/status', async (req, res) => {
     }
 });
 
+// @route   POST /api/users/register-fcm-token
+// @desc    Register FCM token for push notifications
+// @access  Private
+router.post('/register-fcm-token', async (req, res) => {
+    try {
+        const { fcmToken } = req.body;
+
+        if (!fcmToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'FCM token is required'
+            });
+        }
+
+        // Get user from token (from middleware)
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        user.fcmToken = fcmToken;
+        await user.save();
+
+        console.log(`✅ FCM token registered for user: ${user.phoneNumber}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'FCM token registered successfully'
+        });
+    } catch (err) {
+        console.error('Error registering FCM token:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to register FCM token',
+            error: err.message
+        });
+    }
+});
+
 module.exports = router;

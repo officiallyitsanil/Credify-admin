@@ -91,6 +91,11 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    fcmToken: {
+        type: String,
+        trim: true,
+        description: 'Firebase Cloud Messaging token for push notifications'
+    },
     kycRejectionReason: {
         type: String,
         trim: true,
