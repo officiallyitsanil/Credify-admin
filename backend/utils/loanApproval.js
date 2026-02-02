@@ -290,26 +290,28 @@ const processLoanApproval = async (loan, settings) => {
         // Calculate risk score
         const riskAssessment = await calculateRiskScore(user, kyc, loan.amount, settings);
 
-        // Determine action based on risk category
+        // All loans require manual approval by admin
         let action, status, message;
 
+        // Provide risk assessment information but always require manual review
+        // The risk score and category will help admins make informed decisions
         switch (riskAssessment.riskCategory) {
             case 'LOW':
-                action = 'AUTO_APPROVE';
-                status = 'APPROVED';
-                message = 'Loan auto-approved based on low risk profile';
+                action = 'MANUAL_REVIEW';
+                status = 'UNDER_REVIEW';
+                message = 'Loan requires manual review (Low risk profile)';
                 break;
 
             case 'MEDIUM':
                 action = 'MANUAL_REVIEW';
                 status = 'UNDER_REVIEW';
-                message = 'Loan requires manual review due to medium risk factors';
+                message = 'Loan requires manual review (Medium risk profile)';
                 break;
 
             case 'HIGH':
-                action = 'AUTO_REJECT';
-                status = 'REJECTED';
-                message = `Loan auto-rejected due to high risk (Score: ${riskAssessment.riskScore})`;
+                action = 'MANUAL_REVIEW';
+                status = 'UNDER_REVIEW';
+                message = 'Loan requires manual review (High risk profile - proceed with caution)';
                 break;
 
             default:

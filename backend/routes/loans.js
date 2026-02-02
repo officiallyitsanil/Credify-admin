@@ -5,6 +5,7 @@ const Repayment = require('../models/Repayment');
 const LoanSettings = require('../models/LoanSettings');
 const { protect } = require('../middleware/auth');
 const { processLoanApproval } = require('../utils/loanApproval');
+const { notifyLoanApproval } = require('../utils/notificationService');
 
 // All routes are protected
 router.use(protect);
@@ -109,6 +110,14 @@ router.put('/:id/approve', async (req, res) => {
             });
         }
 
+        // Check if user's KYC is verified
+        if (user.kycStatus !== 'VERIFIED') {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot approve loan. User's KYC status is ${user.kycStatus}. KYC must be verified before loan approval.`
+            });
+        }
+
         // Check if user has sufficient credit limit
         if (loan.amount > user.creditLimit) {
             return res.status(400).json({
@@ -161,6 +170,11 @@ router.put('/:id/approve', async (req, res) => {
 
         await repaymentSchedule.save();
 
+        // Send approval notifications to user
+        notifyLoanApproval(loan.phoneNumber, loan).catch(err => {
+            console.error('Error sending loan approval notification:', err);
+        });
+
         res.status(200).json({
             success: true,
             data: loan,
@@ -210,49 +224,10 @@ router.post('/:id/auto-process', async (req, res) => {
         loan.riskCategory = result.riskAssessment?.riskCategory;
         loan.riskFactors = result.riskAssessment?.riskFactors;
 
-        switch (result.action) {
-            case 'AUTO_APPROVE':
-                loan.status = 'APPROVED';
-                loan.approvedAt = Date.now();
-                loan.approvalMethod = 'AUTO';
-                loan.autoApprovalEligible = true;
-
-                // Create repayment schedule
-                const User = require('../models/User');
-                const user = await User.findOne({ phoneNumber: loan.phoneNumber });
-
-                if (user) {
-                    const dueDate = new Date();
-                    dueDate.setDate(dueDate.getDate() + loan.tenureDays);
-
-                    await Repayment.create({
-                        loan: loan._id,
-                        user: user._id,
-                        emiNumber: 1,
-                        emiAmount: loan.totalRepayable,
-                        dueDate: dueDate,
-                        status: 'pending'
-                    });
-
-                    // Update user's used credit
-                    user.usedCredit = (user.usedCredit || 0) + loan.amount;
-                    await user.save();
-                }
-                break;
-
-            case 'MANUAL_REVIEW':
-                loan.status = 'UNDER_REVIEW';
-                loan.manualReviewRequired = true;
-                loan.manualReviewReason = result.message;
-                break;
-
-            case 'AUTO_REJECT':
-                loan.status = 'REJECTED';
-                loan.rejectionReason = result.message;
-                loan.rejectedAt = Date.now();
-                loan.approvalMethod = 'AUTO';
-                break;
-        }
+        // All loans require manual review - no automatic approval or rejection
+        loan.status = 'UNDER_REVIEW';
+        loan.manualReviewRequired = true;
+        loan.manualReviewReason = result.message;
 
         // Add to loan history
         loan.loanHistory.push({

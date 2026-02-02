@@ -12,7 +12,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
+  .then(() => {
+    console.log('✅ MongoDB Connected');
+    
+    // Initialize repayment reminder scheduler after DB connection
+    const { scheduleRepaymentReminders } = require('./utils/reminderScheduler');
+    scheduleRepaymentReminders();
+  })
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes

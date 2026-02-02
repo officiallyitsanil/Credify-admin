@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
     },
     creditLimit: {
         type: Number,
-        default: 0,
+        default: 50000,
         min: 0,
     },
     isBlocked: {

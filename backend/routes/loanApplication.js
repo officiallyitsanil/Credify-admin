@@ -4,6 +4,7 @@ const Loan = require('../models/Loan');
 const User = require('../models/User');
 const LoanSettings = require('../models/LoanSettings');
 const CreditLimit = require('../models/CreditLimit');
+const { notifyLoanApplication } = require('../utils/notificationService');
 
 // @route   POST /api/loan-application/apply
 // @desc    Submit a new loan application (Public route - no auth required)
@@ -199,6 +200,11 @@ router.post('/apply', async (req, res) => {
         });
 
         await loan.save();
+
+        // Send notifications to user
+        notifyLoanApplication(phoneNumber, loan).catch(err => {
+            console.error('Error sending loan application notification:', err);
+        });
 
         res.status(201).json({
             success: true,

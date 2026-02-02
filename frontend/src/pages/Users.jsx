@@ -15,6 +15,13 @@ const Users = () => {
     const [filter, setFilter] = useState('all');
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showCreditModal, setShowCreditModal] = useState(false);
+    const [creditLimitData, setCreditLimitData] = useState({
+        userId: null,
+        creditLimit: 0,
+        reason: '',
+        riskCategory: 'medium'
+    });
 
     useEffect(() => {
         fetchUsers();
@@ -44,10 +51,41 @@ const Users = () => {
         }
     };
 
-    const handleCreditLimitUpdate = async (userId, creditLimit) => {
+    const openCreditLimitModal = (user) => {
+        setCreditLimitData({
+            userId: user._id,
+            creditLimit: user.creditLimit,
+            reason: '',
+            riskCategory: 'medium'
+        });
+        setShowCreditModal(true);
+    };
+
+    const handleCreditLimitUpdate = async () => {
+        if (!creditLimitData.reason.trim()) {
+            alert('Please provide a reason for changing the credit limit');
+            return;
+        }
+
+        if (creditLimitData.creditLimit < 0) {
+            alert('Credit limit cannot be negative');
+            return;
+        }
+
         try {
-            await usersAPI.updateCreditLimit(userId, { creditLimit: parseInt(creditLimit) });
+            await usersAPI.updateCreditLimit(creditLimitData.userId, {
+                creditLimit: parseInt(creditLimitData.creditLimit),
+                reason: creditLimitData.reason,
+                riskCategory: creditLimitData.riskCategory
+            });
             fetchUsers();
+            setShowCreditModal(false);
+            setCreditLimitData({
+                userId: null,
+                creditLimit: 0,
+                reason: '',
+                riskCategory: 'medium'
+            });
         } catch (error) {
             console.error('Error updating credit limit:', error);
             alert('Failed to update credit limit');
@@ -141,13 +179,16 @@ const Users = () => {
                                             </Badge>
                                         </td>
                                         <td>
-                                            <input
-                                                type="number"
-                                                className="credit-input"
-                                                value={user.creditLimit}
-                                                onChange={(e) => handleCreditLimitUpdate(user._id, e.target.value)}
-                                                onBlur={(e) => handleCreditLimitUpdate(user._id, e.target.value)}
-                                            />
+                                            <div className="credit-limit-cell">
+                                                <span className="credit-limit-value">{formatCurrency(user.creditLimit)}</span>
+                                                <button
+                                                    className="edit-credit-btn"
+                                                    onClick={() => openCreditLimitModal(user)}
+                                                    title="Edit Credit Limit"
+                                                >
+                                                    ✏️
+                                                </button>
+                                            </div>
                                         </td>
                                         <td>
                                             <Badge variant={user.isBlocked ? 'error' : 'success'}>
@@ -191,6 +232,72 @@ const Users = () => {
                                 ))}
                             </tbody>
                         </table>
+
+            {/* Credit Limit Modal */}
+            {showCreditModal && (
+                <div className="modal-overlay" onClick={() => setShowCreditModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Update Credit Limit</h3>
+                            <button className="modal-close" onClick={() => setShowCreditModal(false)}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-group">
+                                <label>Credit Limit (₹)</label>
+                                <input
+                                    type="number"
+                                    className="form-input"
+                                    value={creditLimitData.creditLimit}
+                                    onChange={(e) => setCreditLimitData({
+                                        ...creditLimitData,
+                                        creditLimit: e.target.value
+                                    })}
+                                    min="0"
+                                    step="1000"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Risk Category</label>
+                                <select
+                                    className="form-input"
+                                    value={creditLimitData.riskCategory}
+                                    onChange={(e) => setCreditLimitData({
+                                        ...creditLimitData,
+                                        riskCategory: e.target.value
+                                    })}
+                                >
+                                    <option value="low">Low Risk</option>
+                                    <option value="medium">Medium Risk</option>
+                                    <option value="high">High Risk</option>
+                                    <option value="very_high">Very High Risk</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Reason for Change *</label>
+                                <textarea
+                                    className="form-input"
+                                    rows="3"
+                                    placeholder="Enter reason for credit limit adjustment..."
+                                    value={creditLimitData.reason}
+                                    onChange={(e) => setCreditLimitData({
+                                        ...creditLimitData,
+                                        reason: e.target.value
+                                    })}
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <Button variant="secondary" onClick={() => setShowCreditModal(false)}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={handleCreditLimitUpdate}>
+                                Update Credit Limit
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
                     </div>
                 </Card>
             </div>

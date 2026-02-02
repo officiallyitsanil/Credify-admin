@@ -90,6 +90,16 @@ router.patch('/:id/status', verifyAdmin, async (req, res) => {
             return res.status(404).json({ message: 'Disbursement not found' });
         }
 
+        // Send notification when disbursement is completed
+        if (status === 'completed' && disbursement.loanId) {
+            const loan = await Loan.findById(disbursement.loanId);
+            if (loan && loan.phoneNumber) {
+                notifyLoanDisbursement(loan.phoneNumber, loan, disbursement).catch(err => {
+                    console.error('Error sending disbursement notification:', err);
+                });
+            }
+        }
+
         res.json(disbursement);
     } catch (error) {
         res.status(400).json({ message: error.message });
