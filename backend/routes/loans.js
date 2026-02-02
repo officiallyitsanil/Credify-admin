@@ -169,10 +169,12 @@ router.put('/:id/approve', async (req, res) => {
         });
 
         await repaymentSchedule.save();
+        console.log('✅ Repayment schedule created');
 
         // Send approval notifications to user
+        console.log('📧 Sending approval notifications...');
         notifyLoanApproval(loan.phoneNumber, loan).catch(err => {
-            console.error('Error sending loan approval notification:', err);
+            console.error('❌ Error sending loan approval notification:', err);
         });
 
         res.status(200).json({
@@ -181,7 +183,8 @@ router.put('/:id/approve', async (req, res) => {
             message: 'Loan approved successfully'
         });
     } catch (err) {
-        console.error('Error approving loan:', err);
+        console.error('❌ Error approving loan:', err);
+        console.error('Error stack:', err.stack);
         res.status(500).json({
             success: false,
             message: 'Failed to approve loan',
